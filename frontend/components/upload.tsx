@@ -1,0 +1,214 @@
+"use client"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import { UploadIcon, FileText, ClipboardPaste } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { getStacks, createDeck, createCards } from "@/lib/api"
+import type { Deck, Flashcard, Stack } from "@/lib/types"
+
+interface UploadProps {
+  onUploadComplete: () => void
+  selectedStackId?: string
+}
+
+export function Upload({ onUploadComplete, selectedStackId }: UploadProps) {
+  const [deckName, setDeckName] = useState("")
+  const [stackId, setStackId] = useState(selectedStackId || "general")
+  const [file, setFile] = useState<File | null>(null)
+  const [pastedText, setPastedText] = useState("")
+  const [error, setError] = useState("")
+  const [stacks, setStacks] = useState<Stack[]>([])
+
+  useEffect(() => {
+    const loadStacks = async () => {
+      const loadedStacks = await getStacks()
+      setStacks(loadedStacks)
+    }
+    loadStacks()
+  }, [])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0]
+    if (selectedFile && selectedFile.type === "text/csv") {
+      setFile(selectedFile)
+      setError("")
+    } else {
+      setFile(null)
+      setError("Please select a valid CSV file")
+    }
+  }
+
+  const parseCSV = (text: string): Flashcard[] => {
+    const lines = text.split("\n").filter((line) => line.trim())
+    const cards: Flashcard[] = []
+
+    const startIndex = lines[0].toLowerCase().includes("front") || lines[0].toLowerCase().includes("question") ? 1 : 0
+
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i].trim()
+      if (!line) continue
+
+      const parts = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)
+      if (parts && parts.length >= 2) {
+        const front = parts[0].replace(/^"|"$/g, "").trim()
+        const back = parts[1].replace(/^"|"$/g, "").trim()
+
+        if (front && back) {
+          cards.push({
+            id: `${Date.now()}-${i}`,
+            front,
+            back,
+            missed: false,
+          })
+        }
+      }
+    }
+
+    return cards
+  }
+
+  const handleUpload = async () => {
+    if (!deckName.trim()) {
+      setError("Please provide a deck name")
+      return
+    }
+  
+    if (!file && !pastedText.trim()) {
+      setError("Please provide CSV data via file upload or paste")
+      return
+    }
+  
+    try {
+      const text = file ? await file.text() : pastedText
+      const cards = parseCSV(text)
+  
+      if (cards.length === 0) {
+        setError("No valid flashcards found in CSV. Expected format: front,back")
+        return
+      }
+  
+      // 1. Create the deck in the database
+      const newDeck = await createDeck(stackId, deckName.trim())
+      
+      // 2. Add all cards to the deck
+      await createCards(newDeck.$id, cards)
+  
+      // Reset form
+      setDeckName("")
+      setFile(null)
+      setPastedText("")
+      setError("")
+      onUploadComplete()
+  
+      // Clear file input
+      const fileInput = document.getElementById("csv-file") as HTMLInputElement
+      if (fileInput) fileInput.value = ""
+    } catch (err) {
+      console.error("Failed to save deck:", err)
+      setError("Failed to save deck. Please try again.")
+    }
+  }
+
+  return (
+    <Card className="border-border bg-card">
+      <CardHeader>
+        <CardTitle className="text-foreground">Create New Deck</CardTitle>
+        <CardDescription className="text-muted-foreground">
+          Upload a CSV file or paste CSV data with two columns: front (question) and back (answer)
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="deck-name" className="text-foreground">
+            Deck Name
+          </Label>
+          <Input
+            id="deck-name"
+            placeholder="e.g., Spanish Vocabulary"
+            value={deckName}
+            onChange={(e) => setDeckName(e.target.value)}
+            className="bg-background text-foreground"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="stack-select" className="text-foreground">
+            Stack
+          </Label>
+          <Select value={stackId} onValueChange={setStackId}>
+            <SelectTrigger id="stack-select" className="bg-background text-foreground">
+              <SelectValue placeholder="Select a stack" />
+            </SelectTrigger>
+            <SelectContent>
+              {stacks.map((stack) => (
+                <SelectItem key={stack.id} value={stack.id}>
+                  {stack.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Tabs defaultValue="upload" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="upload">Upload File</TabsTrigger>
+            <TabsTrigger value="paste">Paste CSV</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="upload" className="space-y-2">
+            <Label htmlFor="csv-file" className="text-foreground">
+              CSV File
+            </Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="csv-file"
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                className="bg-background text-foreground"
+              />
+              {file && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <FileText className="h-4 w-4" />
+                  <span>{file.name}</span>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="paste" className="space-y-2">
+            <Label htmlFor="csv-paste" className="text-foreground">
+              CSV Data
+            </Label>
+            <Textarea
+              id="csv-paste"
+              placeholder="Paste your CSV data here...&#10;Example:&#10;What is 2+2?,4&#10;Capital of France?,Paris"
+              value={pastedText}
+              onChange={(e) => {
+                setPastedText(e.target.value)
+                setError("")
+              }}
+              className="bg-background text-foreground min-h-[150px] font-mono text-sm"
+            />
+          </TabsContent>
+        </Tabs>
+
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <div className="text-xs text-gray-500 mb-2">
+          Debug: Name="{deckName}" Text={pastedText.length} chars Button={(deckName.trim() && (file || pastedText.trim())) ? "enabled" : "disabled"}
+        </div>
+        <Button onClick={handleUpload} disabled={!deckName.trim() || (!file && !pastedText.trim())} className="w-full">
+          {file || pastedText ? <UploadIcon className="mr-2 h-4 w-4" /> : <ClipboardPaste className="mr-2 h-4 w-4" />}
+          Create Deck
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
