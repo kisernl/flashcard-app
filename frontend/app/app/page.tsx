@@ -12,6 +12,8 @@ import { ArrowLeft, SearchIcon } from "lucide-react"
 import type { Deck, Stack } from "@/lib/types"
 import { getDecksByStack, migrateFromLocalStorage } from "@/lib/storage"
 import { getStacks, getDecksForStack, resetDeck } from "@/lib/api";
+import { AppHeader } from "@/components/header"
+import { AppFooter } from "@/components/footer"
 
 
 
@@ -138,8 +140,9 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+    <div className="min-h-screen flex flex-col bg-background">
+      <AppHeader />
+      <header className="bg-card">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             {currentView === "decks" && (
@@ -170,12 +173,11 @@ export default function Home() {
                 <SearchIcon className="h-5 w-5" />
               </Button>
             )}
-            <ThemeToggle />
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8">
         {currentView === "stacks" && (
           <StackList 
             onSelectStack={handleSelectStack} 
@@ -184,7 +186,10 @@ export default function Home() {
 
         {currentView === "decks" && selectedStack && (
           <div className="space-y-8">
-            <Upload onUploadComplete={refreshDecks} selectedStackId={selectedStack.id} />
+            <div>
+              <Upload onUploadComplete={refreshDecks} selectedStackId={selectedStack.id} />
+            </div>
+
             <DeckList 
               decks={decks} 
               onSelectDeck={handleSelectDeck} 
@@ -200,6 +205,7 @@ export default function Home() {
 
         {currentView === "search" && <Search onSelectDeck={(deck) => handleSelectDeck(deck, false)} />}
       </main>
+      <AppFooter />
     </div>
   )
 }

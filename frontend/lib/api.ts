@@ -115,6 +115,7 @@ export async function getCardsForDeck(deckId: string): Promise<Array<CardDocumen
         queries: [
             Query.equal("decks", deckId),
             Query.orderAsc("order"),
+            Query.limit(500),
         ],
     });
     return res.documents;

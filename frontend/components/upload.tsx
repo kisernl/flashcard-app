@@ -201,9 +201,6 @@ export function Upload({ onUploadComplete, selectedStackId }: UploadProps) {
         </Tabs>
 
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <div className="text-xs text-gray-500 mb-2">
-          Debug: Name="{deckName}" Text={pastedText.length} chars Button={(deckName.trim() && (file || pastedText.trim())) ? "enabled" : "disabled"}
-        </div>
         <Button onClick={handleUpload} disabled={!deckName.trim() || (!file && !pastedText.trim())} className="w-full">
           {file || pastedText ? <UploadIcon className="mr-2 h-4 w-4" /> : <ClipboardPaste className="mr-2 h-4 w-4" />}
           Create Deck

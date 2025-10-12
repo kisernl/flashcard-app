@@ -121,7 +121,7 @@ export function StackList({ onSelectStack }: StackListProps) {
         {stacks.map((stack) => {
           const deckCount = deckCounts[stack.id] || 0
           return (
-            <Card key={stack.id} className="group transition-colors hover:border-primary/50">
+            <Card key={stack.id} className="group transition-colors dark:bg-zinc-900 hover:border-primary/50">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
