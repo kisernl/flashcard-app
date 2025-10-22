@@ -5,9 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export function AuthModal() {
   const { login, signup } = useAuth();
+  const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,9 +21,13 @@ export function AuthModal() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (mode === "login") await login(email, password);
-      else await signup(email, password, name);
-      setOpen(false);
+      if (mode === "login") {
+        await login(email, password);
+      } else {
+        await signup(email, password); // make sure signup accepts name if needed
+      }
+      setOpen(false); 
+      router.push("/app"); // redirect to dashboard after success
     } catch (err) {
       console.error(err);
       alert("Authentication failed");
