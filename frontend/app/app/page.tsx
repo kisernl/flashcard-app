@@ -14,6 +14,7 @@ import { getDecksByStack, migrateFromLocalStorage } from "@/lib/storage"
 import { getStacks, getDecksForStack, resetDeck } from "@/lib/api";
 import { AppHeader } from "@/components/header"
 import { AppFooter } from "@/components/footer"
+import { useAuth } from "@/context/AuthContext"
 
 
 
@@ -27,6 +28,7 @@ export default function Home() {
   const [decks, setDecks] = useState<Deck[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [stacks, setStacks] = useState<Stack[]>([]);
+  const { user } = useAuth()
 
   useEffect(() => {
     const initialize = async () => {
@@ -51,7 +53,7 @@ export default function Home() {
     const loadInitialData = async () => {
       try {
         setIsLoading(true);
-        const loadedStacks = await getStacks();
+        const loadedStacks = await getStacks(user?.$id || "");
         setStacks(loadedStacks);
       } catch (error) {
         console.error("Failed to load stacks:", error);
@@ -73,7 +75,7 @@ export default function Home() {
   const refreshDecks = async () => {
     if (selectedStack) {
       try {
-        const loadedDecks = await getDecksForStack(selectedStack.id);
+        const loadedDecks = await getDecksForStack(selectedStack.id, user?.$id || "");
         setDecks(loadedDecks);
       } catch (error) {
         console.error("Failed to refresh decks:", error);
@@ -91,7 +93,7 @@ export default function Home() {
   const handleSelectStack = async (stack: Stack) => {
     try {
       setIsLoading(true);
-      const loadedDecks = await getDecksForStack(stack.id);
+      const loadedDecks = await getDecksForStack(stack.id, user?.$id || "");
       setDecks(loadedDecks);
       setSelectedStack(stack);
       setCurrentView("decks");
@@ -180,14 +182,15 @@ export default function Home() {
       <main className="flex-1 container mx-auto px-4 py-8">
         {currentView === "stacks" && (
           <StackList 
-            onSelectStack={handleSelectStack} 
+            onSelectStack={handleSelectStack}
+            userId={user?.$id || ""} 
           />
         )}
 
         {currentView === "decks" && selectedStack && (
           <div className="space-y-8">
             <div>
-              <Upload onUploadComplete={refreshDecks} selectedStackId={selectedStack.id} />
+              <Upload onUploadComplete={refreshDecks} selectedStackId={selectedStack.id} userId={user?.$id || ""} />
             </div>
 
             <DeckList 

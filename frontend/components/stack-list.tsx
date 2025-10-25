@@ -14,9 +14,10 @@ import { getStacks, getDecksForStack, createStack, deleteStack as apiDeleteStack
 
 interface StackListProps {
   onSelectStack: (stack: Stack) => void
+  userId: string
 }
 
-export function StackList({ onSelectStack }: StackListProps) {
+export function StackList({ onSelectStack, userId }: StackListProps) {
   const [stacks, setStacks] = useState<Stack[]>([])
   const [deckCounts, setDeckCounts] = useState<Record<string, number>>({})
   const [newStackName, setNewStackName] = useState("")
@@ -26,13 +27,13 @@ export function StackList({ onSelectStack }: StackListProps) {
   const loadData = async () => {
     setIsLoading(true)
     try {
-      const loadedStacks = await getStacks()
+      const loadedStacks = await getStacks(userId)
       setStacks(loadedStacks)
 
       // Load deck counts for each stack
       const counts: Record<string, number> = {}
       for (const stack of loadedStacks) {
-        const decks = await getDecksForStack(stack.id)  // Changed from stack.$id to stack.id
+        const decks = await getDecksForStack(stack.id, userId)  // Changed from stack.$id to stack.id
         counts[stack.id] = decks.length  // Changed from stack.$id to stack.id
       }
       setDeckCounts(counts)
@@ -52,7 +53,7 @@ export function StackList({ onSelectStack }: StackListProps) {
 
     try {
       // Using API for stack creation
-      await createStack(newStackName.trim())
+      await createStack(newStackName.trim(), userId)
       setNewStackName("")
       setIsDialogOpen(false)
       await loadData()

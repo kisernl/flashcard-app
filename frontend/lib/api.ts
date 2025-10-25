@@ -1,6 +1,6 @@
 // /lib/api.ts
 import { databases} from "./appwrite";
-import { Models, Query } from "appwrite";
+import { ID, Permission, Role, Models, Query } from "appwrite";
 import { Stack, Deck, Flashcard } from "./types";
 
 
@@ -26,18 +26,20 @@ interface CardDocument extends Models.Document {
     back: string;
     order: number;
     missed?: boolean;
+    ownerId: string;
   }
 
 interface StackDocument extends Models.Document {
     name?: string;
+    ownerId: string;
 }
 
 // Get all stacks
-export async function getStacks(): Promise<Stack[]> {
+export async function getStacks(userId: string): Promise<Stack[]> {
   const res: Models.DocumentList = await databases.listDocuments({
     databaseId: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
     collectionId: "stacks",
-    queries: []
+    queries: [Query.equal("ownerId", userId)]
   });
   
   return res.documents.map(doc => ({
@@ -64,18 +66,21 @@ export async function getStacks(): Promise<Stack[]> {
 //   }));
 // }
 
-export async function getDecksForStack(stackId: string): Promise<Deck[]> {
+export async function getDecksForStack(stackId: string, userId: string): Promise<Deck[]> {
     // First get all decks for this stack
     const decksRes = await databases.listDocuments({
       databaseId: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
       collectionId: "decks",
-      queries: [Query.equal("stacks", stackId)]
+      queries: [
+        Query.equal("stacks", stackId), 
+        Query.equal("ownerId", userId)
+      ]
     });
   
     // For each deck, get its cards
     const decksWithCards = await Promise.all(
       decksRes.documents.map(async (doc) => {
-        const cards = await getCardsForDeck(doc.$id);
+        const cards = await getCardsForDeck(doc.$id, userId);
         return {
           id: doc.$id,
           title: doc.title || 'Unnamed Deck',
@@ -108,12 +113,13 @@ export async function getDecksForStack(stackId: string): Promise<Deck[]> {
 // }
 
 // Get all cards in a specific deck, sorted by 'order'
-export async function getCardsForDeck(deckId: string): Promise<Array<CardDocument & Models.Document>> {
+export async function getCardsForDeck(deckId: string, userId: string): Promise<Array<CardDocument & Models.Document>> {
     const res = await databases.listDocuments<CardDocument & Models.Document>({
         databaseId: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
         collectionId: "cards",
         queries: [
             Query.equal("decks", deckId),
+            Query.equal("ownerId", userId),
             Query.orderAsc("order"),
             Query.limit(500),
         ],
@@ -122,26 +128,30 @@ export async function getCardsForDeck(deckId: string): Promise<Array<CardDocumen
 }
 
 // Create a new deck in a stack
-export async function createDeck(stackId: string, name: string): Promise<Models.Document> {
+export async function createDeck(stackId: string, name: string, userId: string): Promise<Models.Document> {
     const deckData = {
       stacks: stackId,
-      title: name
+      title: name,
+      ownerId: userId,
     };
   
-    const deck = await databases.createDocument(
+    return await databases.createDocument(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
       "decks",
-      "unique()",
-      deckData
+      ID.unique(),
+      deckData,
+      [
+        Permission.read(Role.user(userId)),
+        Permission.update(Role.user(userId)),
+        Permission.delete(Role.user(userId)),
+      ]
     );
-  
-    return deck;
   }
 
 
   
 // Then update the createCards function
-export async function createCards(deckId: string, cards: { front: string; back: string }[]): Promise<CardDocument[]> {
+export async function createCards(deckId: string, cards: { front: string; back: string }[], userId: string): Promise<CardDocument[]> {
     const createdCards: CardDocument[] = [];
   
     for (let i = 0; i < cards.length; i++) {
@@ -149,14 +159,20 @@ export async function createCards(deckId: string, cards: { front: string; back: 
         decks: deckId,
         front: cards[i].front,
         back: cards[i].back,
-        order: i
+        order: i,
+        ownerId: userId,
       };
   
       const card = await databases.createDocument<CardDocument>({
         databaseId: process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
         collectionId: "cards",
-        documentId: "unique()",
-        data: cardData
+        documentId: ID.unique(),
+        data: cardData,
+        permissions: [
+            Permission.read(Role.user(userId)),
+            Permission.update(Role.user(userId)),
+            Permission.delete(Role.user(userId))
+        ]
       });
       createdCards.push(card);
     }
@@ -164,13 +180,21 @@ export async function createCards(deckId: string, cards: { front: string; back: 
     return createdCards;
   }
 // Create a new stack
-export async function createStack(name: string): Promise<Models.Document> {
-    const stackData: Omit<StackDocument, keyof Models.Document> = { name };
+export async function createStack(name: string, userId: string): Promise<Models.Document> {
+    const stackData: Omit<StackDocument, keyof Models.Document> = { 
+      name,
+      ownerId: userId,
+     };
     return await databases.createDocument(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
       "stacks",
-      "unique()",
-      stackData
+      ID.unique(),
+      stackData,
+      [
+        Permission.read(Role.user(userId)),
+        Permission.update(Role.user(userId)),
+        Permission.delete(Role.user(userId)),
+      ]
     );
   }
   
@@ -185,11 +209,11 @@ return await databases.updateDocument(
 }
 
 // Delete a stack
-export async function deleteStack(stackId: string): Promise<void> {
+export async function deleteStack(stackId: string, userId: string): Promise<void> {
 // First, delete all decks in this stack
-const decks = await getDecksForStack(stackId);
+const decks = await getDecksForStack(stackId, userId);
 for (const deck of decks) {
-    await deleteDeck(deck.id);
+    await deleteDeck(deck.id, userId);
 }
 
 // Then delete the stack itself
@@ -201,11 +225,11 @@ await databases.deleteDocument(
 }
 
 // Helper function to delete a deck and its cards
-export async function deleteDeck(deckId: string): Promise<void> {
+export async function deleteDeck(deckId: string, userId: string): Promise<void> {
 // First delete all cards in this deck
 console.log("Deleting deck:", deckId);
 
-const cards = await getCardsForDeck(deckId);
+const cards = await getCardsForDeck(deckId, userId);
 for (const card of cards) {
     await databases.deleteDocument(
     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
@@ -223,9 +247,9 @@ await databases.deleteDocument(
 }
 
 // In api.ts
-export async function resetDeck(deckId: string): Promise<void> {
+export async function resetDeck(deckId: string, userId: string): Promise<void> {
     // Get all cards for the deck
-    const cards = await getCardsForDeck(deckId);
+    const cards = await getCardsForDeck(deckId, userId);
     
     // Reset each card's missed status
     for (const card of cards) {

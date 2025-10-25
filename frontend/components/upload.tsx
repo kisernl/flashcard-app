@@ -15,10 +15,11 @@ import type { Deck, Flashcard, Stack } from "@/lib/types"
 
 interface UploadProps {
   onUploadComplete: () => void
-  selectedStackId?: string
+  selectedStackId: string
+  userId: string
 }
 
-export function Upload({ onUploadComplete, selectedStackId }: UploadProps) {
+export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProps) {
   const [deckName, setDeckName] = useState("")
   const [stackId, setStackId] = useState(selectedStackId || "general")
   const [file, setFile] = useState<File | null>(null)
@@ -28,7 +29,7 @@ export function Upload({ onUploadComplete, selectedStackId }: UploadProps) {
 
   useEffect(() => {
     const loadStacks = async () => {
-      const loadedStacks = await getStacks()
+      const loadedStacks = await getStacks(userId)
       setStacks(loadedStacks)
     }
     loadStacks()
@@ -95,10 +96,10 @@ export function Upload({ onUploadComplete, selectedStackId }: UploadProps) {
       }
   
       // 1. Create the deck in the database
-      const newDeck = await createDeck(stackId, deckName.trim())
+      const newDeck = await createDeck(stackId, deckName.trim(), userId)
       
       // 2. Add all cards to the deck
-      await createCards(newDeck.$id, cards)
+      await createCards(newDeck.$id, cards, userId)
   
       // Reset form
       setDeckName("")

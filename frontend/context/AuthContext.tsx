@@ -1,12 +1,17 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { account } from "@/lib/appwrite"; // your initialized Appwrite client
+import { account } from "@/lib/appwrite";
 import type { Models } from "appwrite";
 import { ID } from "appwrite";
 
+// Extend the default User type to include the id property
+type AppUser = Models.User<{ [key: string]: any }> & {
+  $id: string;
+};
+
 interface AuthContextType {
-  user: Models.User | null;
+  user: AppUser | null;
   isAuthenticated: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -24,7 +29,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<Models.User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
