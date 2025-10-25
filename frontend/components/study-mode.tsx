@@ -66,10 +66,10 @@ export function StudyMode({ deck, showMissedOnly, onBack }: StudyModeProps) {
   if (studyCards.length === 0) {
     return (
       <div className="space-y-6">
-        <Button onClick={onBack} variant="ghost" className="gap-2">
+        {/* <Button onClick={onBack} variant="ghost" className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Decks
-        </Button>
+        </Button> */}
 
         <Card className="border-border bg-card">
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -87,10 +87,10 @@ export function StudyMode({ deck, showMissedOnly, onBack }: StudyModeProps) {
 
     return (
       <div className="space-y-6">
-        <Button onClick={onBack} variant="ghost" className="gap-2">
+        {/* <Button onClick={onBack} variant="ghost" className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Decks
-        </Button>
+        </Button> */}
 
         <Card className="border-border bg-card">
           <CardContent className="flex flex-col items-center justify-center space-y-6 py-12">
@@ -123,10 +123,10 @@ export function StudyMode({ deck, showMissedOnly, onBack }: StudyModeProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button onClick={onBack} variant="ghost" className="gap-2">
+        {/* <Button onClick={onBack} variant="ghost" className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Decks
-        </Button>
+        </Button> */}
 
         <div className="text-sm text-muted-foreground">
           {currentIndex + 1} / {studyCards.length}

@@ -154,7 +154,7 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
           />
         </div>
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label htmlFor="stack-select" className="text-foreground">
             Stack
           </Label>
@@ -170,7 +170,7 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
 
         <Tabs defaultValue="upload" className="w-full">
           <TabsList className="grid w-full grid-cols-2">

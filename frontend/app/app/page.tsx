@@ -163,12 +163,12 @@ export default function Home() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             )}
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            <div className="text-xl font-semibold tracking-tight text-foreground">
               {currentView === "stacks" && "Flashcards"}
-              {currentView === "decks" && selectedStack?.name}
-              {currentView === "study" && selectedDeck?.title}
+              {currentView === "decks" && "Back to Stacks"}
+              {currentView === "study" && "Back to Decks"}
               {currentView === "search" && "Search"}
-            </h1>
+            </div>
           </div>
           {/* <div className="flex items-center gap-2">
             {currentView !== "search" && currentView !== "study" && (
@@ -188,37 +188,39 @@ export default function Home() {
           />
         )}
 
-{currentView === "decks" && selectedStack && (
-  <div className="space-y-8">
-    <div className="grid gap-4 md:grid-cols-3">
-      <StackDescription 
-        stack={selectedStack}
-        deckCount={decks.length} 
-        onUpdate={(updatedStack) => {
-          setSelectedStack(updatedStack);
-          // If you have a stacks state that needs updating, update it here as well
-        }}
-      />
-      <div className="col-span-2">
-        <Upload 
-          onUploadComplete={refreshDecks} 
-          selectedStackId={selectedStack.id} 
-          userId={user?.$id || ""} 
-        />
-      </div>
-    </div>
-    <DeckList 
-      decks={decks} 
-      onSelectDeck={handleSelectDeck} 
-      onDeckDeleted={refreshDecks} 
-      onResetDeck={(deckId) => resetDeck(deckId, user?.$id || "")}
-      userId={user?.$id || ""}
-    />
-  </div>
-)}
+        {currentView === "decks" && selectedStack && (
+          <div className="space-y-8">
+            <div className="grid gap-4 md:grid-cols-3">
+              <StackDescription 
+                stack={selectedStack}
+                deckCount={decks.length} 
+                onUpdate={(updatedStack) => {
+                  setSelectedStack(updatedStack);
+                }}
+              />
+              <div className="col-span-2">
+                <Upload 
+                  onUploadComplete={refreshDecks} 
+                  selectedStackId={selectedStack.id} 
+                  userId={user?.$id || ""} 
+                />
+              </div>
+            </div>
+            <DeckList 
+              decks={decks} 
+              onSelectDeck={handleSelectDeck} 
+              onDeckDeleted={refreshDecks} 
+              onResetDeck={(deckId) => resetDeck(deckId, user?.$id || "")}
+              userId={user?.$id || ""}
+            />
+          </div>
+        )}
 
         {currentView === "study" && selectedDeck && (
-          <StudyMode deck={selectedDeck} showMissedOnly={showMissedOnly} onBack={handleBackToDecks} />
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">{selectedDeck.title}</h2>
+            <StudyMode deck={selectedDeck} showMissedOnly={showMissedOnly} onBack={handleBackToDecks} />
+          </div>
         )}
 
         {currentView === "search" && <Search onSelectDeck={(deck) => handleSelectDeck(deck, false)} />}

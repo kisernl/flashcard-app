@@ -6,9 +6,11 @@ import { Button } from "./ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth } from "@/context/AuthContext";
 import { AuthModal } from "./AuthModal";
+import { usePathname } from "next/navigation";
 
 export function AppHeader() {
   const { user, logout, loading } = useAuth();
+  const pathname = usePathname();
 
   return (
     <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -42,6 +44,13 @@ export function AppHeader() {
               <span className="text-sm font-medium text-muted-foreground">
                 Hi, {user.name || user.email}
               </span>
+              {pathname !== '/app' && (
+                <Link href="/app" passHref>
+                  <Button className="font-medium bg-primary text-primary-foreground hover:bg-primary/90">
+                    Study
+                  </Button>
+                </Link>
+              )}
               <Button
                 variant="outline"
                 className="font-medium"
