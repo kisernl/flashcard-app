@@ -62,11 +62,11 @@ export function StackList({ onSelectStack, userId }: StackListProps) {
     }
   }
 
-  const handleDeleteStack = async (stackId: string) => {
+  const handleDeleteStack = async (stackId: string, userId: string) => {
     if (stackId === "general") return
     if (confirm("Delete this stack? All decks will be moved to General.")) {
       try {
-        await apiDeleteStack(stackId)
+        await apiDeleteStack(stackId, userId)
         await loadData()
       } catch (error) {
         console.error("Failed to delete stack:", error)
@@ -136,7 +136,7 @@ export function StackList({ onSelectStack, userId }: StackListProps) {
                       className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleDeleteStack(stack.id)
+                        handleDeleteStack(stack.id, userId)
                       }}
                     >
                       <Trash2 className="h-4 w-4" />

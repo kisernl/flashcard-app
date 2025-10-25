@@ -169,13 +169,13 @@ export default function Home() {
               {currentView === "search" && "Search"}
             </h1>
           </div>
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             {currentView !== "search" && currentView !== "study" && (
               <Button variant="ghost" size="icon" onClick={handleSearchClick}>
                 <SearchIcon className="h-5 w-5" />
               </Button>
             )}
-          </div>
+          </div> */}
         </div>
       </header>
 
@@ -197,7 +197,7 @@ export default function Home() {
               decks={decks} 
               onSelectDeck={handleSelectDeck} 
               onDeckDeleted={refreshDecks} 
-              onResetDeck={resetDeck}
+              onResetDeck={(deckId) => resetDeck(deckId, user?.$id || "")}
             />
           </div>
         )}

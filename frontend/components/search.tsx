@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useContext } from "react"
 import { SearchIcon } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { useAuth } from "@/context/AuthContext"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,17 +30,28 @@ export function Search({ onSelectDeck }: SearchProps) {
   const [decks, setDecks] = useState<Deck[]>([])
   const [stacks, setStacks] = useState<Stack[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const { user } = useAuth()
 
   useEffect(() => {
     const loadData = async () => {
+      if (!user) return
+      
       setIsLoading(true)
-      const [loadedDecks, loadedStacks] = await Promise.all([getDecksForStack("all"), getStacks()])
-      setDecks(loadedDecks)
-      setStacks(loadedStacks)
-      setIsLoading(false)
+      try {
+        const [loadedDecks, loadedStacks] = await Promise.all([
+          getDecksForStack("all", user.$id),
+          getStacks(user.$id)
+        ])
+        setDecks(loadedDecks)
+        setStacks(loadedStacks)
+      } catch (error) {
+        console.error("Error loading data:", error)
+      } finally {
+        setIsLoading(false)
+      }
     }
     loadData()
-  }, [])
+  }, [user])
 
   const deckResults = useMemo(() => {
     if (!searchQuery.trim()) return []
