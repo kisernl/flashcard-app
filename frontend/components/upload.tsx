@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getStacks, createDeck, createCards } from "@/lib/api"
 import type { Deck, Flashcard, Stack } from "@/lib/types"
+import { ManualEntryForm } from "./manual-entry-form"
 
 interface UploadProps {
   onUploadComplete: () => void
@@ -27,6 +28,8 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
   const [pastedText, setPastedText] = useState("")
   const [error, setError] = useState("")
   const [stacks, setStacks] = useState<Stack[]>([])
+  const [activeTab, setActiveTab] = useState("upload")
+
 
   useEffect(() => {
     const loadStacks = async () => {
@@ -172,12 +175,14 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
           </Select>
         </div> */}
 
-        <Tabs defaultValue="upload" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="upload">Upload File</TabsTrigger>
             <TabsTrigger value="paste">Paste CSV</TabsTrigger>
+            <TabsTrigger value="manual">Manual Entry</TabsTrigger>
           </TabsList>
 
+          {/* Upload File */}
           <TabsContent value="upload" className="space-y-2">
             <Label htmlFor="csv-file" className="text-foreground">
               CSV File
@@ -199,6 +204,7 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
             </div>
           </TabsContent>
 
+          {/* Paste CSV */}
           <TabsContent value="paste" className="space-y-2">
             <Label htmlFor="csv-paste" className="text-foreground">
               CSV Data
@@ -214,13 +220,47 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
               className="bg-background text-foreground min-h-[150px] font-mono text-sm"
             />
           </TabsContent>
+
+          {/* Manual Entry */}
+          <TabsContent value="manual" className="space-y-4">
+            <ManualEntryForm
+              onChangeError={setError}
+              onSubmit={async (cards) => {
+                if (!deckName.trim()) {
+                  setError("Please provide a deck name")
+                  return
+                }
+
+                const newDeck = await createDeck(stackId, deckName.trim(), userId)
+                await createCards(newDeck.$id, cards, userId)
+
+                setDeckName("")
+                setDescription("")
+                setError("")
+                onUploadComplete()
+              }}
+            />
+          </TabsContent>
         </Tabs>
 
+
+
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <Button onClick={handleUpload} disabled={!deckName.trim() || (!file && !pastedText.trim())} className="w-full">
-          {file || pastedText ? <UploadIcon className="mr-2 h-4 w-4" /> : <ClipboardPaste className="mr-2 h-4 w-4" />}
-          Create Deck
-        </Button>
+        {activeTab !== "manual" && (
+          <Button
+            onClick={handleUpload}
+            disabled={!deckName.trim() || (!file && !pastedText.trim())}
+            className="w-full"
+          >
+            {file || pastedText ? (
+              <UploadIcon className="mr-2 h-4 w-4" />
+            ) : (
+              <ClipboardPaste className="mr-2 h-4 w-4" />
+            )}
+            Create Deck
+          </Button>
+        )}
+
       </CardContent>
     </Card>
   )
