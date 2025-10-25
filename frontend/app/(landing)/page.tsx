@@ -112,21 +112,96 @@ export default function LandingPage() {
       </section> */}
   
     
-      {/* Screenshot Preview */}
+      {/* How It Works Section */}
       <section className="bg-muted/30 py-20">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-semibold mb-6">See It In Action</h2>
-          <p className="text-muted-foreground mb-10 max-w-xl mx-auto">
-            A clean, distraction-free study environment built for simplicity and speed.
-          </p>
-          <div className="rounded-2xl overflow-hidden border border-border shadow-lg max-w-4xl mx-auto">
-            <Image
-              src="/placeholder_screenshot.png"
-              alt="App preview screenshot"
-              width={1200}
-              height={800}
-              className="w-full h-auto"
-            />
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">How CapireIQ Works</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Three simple ways to create flashcards, designed for the AI era
+            </p>
+          </div>
+
+          {/* Three Main Methods */}
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            {/* AI-First Creation */}
+            <div className="bg-background rounded-xl p-8 border border-border shadow-sm">
+              <div className="text-6xl font-bold text-primary/20 mb-4">01</div>
+              <h3 className="text-2xl font-bold mb-4">AI-Powered Creation</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Ask your favorite AI chatbot to create a CSV for flashcards on any topic, or share your class notes 
+                and request CSV flashcard entries. <span className="font-semibold text-foreground">Just copy and paste</span> to create 
+                a deck of custom flashcards.
+              </p>
+            </div>
+
+            {/* CSV Upload */}
+            <div className="bg-background rounded-xl p-8 border border-border shadow-sm">
+              <div className="text-6xl font-bold text-primary/20 mb-4">02</div>
+              <h3 className="text-2xl font-bold mb-4">Direct CSV Upload</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Already have a CSV file? <span className="font-semibold text-foreground">Upload it directly</span> to create 
+                your flashcard deck instantly. No formatting hassles, no manual entry required.
+              </p>
+            </div>
+
+            {/* Manual Creation */}
+            <div className="bg-background rounded-xl p-8 border border-border shadow-sm">
+              <div className="text-6xl font-bold text-primary/20 mb-4">03</div>
+              <h3 className="text-2xl font-bold mb-4">Manual Card Builder</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Prefer hands-on control? Create individual cards manually with our 
+                <span className="font-semibold text-foreground"> intuitive interface</span>. Perfect for quick additions.
+              </p>
+            </div>
+          </div>
+
+          {/* Additional Benefits */}
+          <div className="max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold text-center mb-8">Plus Smart Organization & Review</h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="text-center">
+                <h4 className="text-lg font-semibold mb-2">Stack Organization</h4>
+                <p className="text-muted-foreground">
+                  Organize your cards into <span className="font-medium text-foreground">stacks of related decks</span> for 
+                  structured learning paths.
+                </p>
+              </div>
+              <div className="text-center">
+                <h4 className="text-lg font-semibold mb-2">Smart Review</h4>
+                <p className="text-muted-foreground">
+                  <span className="font-medium text-foreground">Mark cards to review only the ones you missed</span> next 
+                  time around. Study smarter, not harder.
+                </p>
+              </div>
+              <div className="text-center">
+                <h4 className="text-lg font-semibold mb-2">Easy Expansion</h4>
+                <p className="text-muted-foreground">
+                  Need to add more cards to your deck? <span className="font-medium text-foreground">No problem.</span> 
+                  Expand existing decks anytime.
+                </p>
+              </div>
+              <div className="text-center">
+                <h4 className="text-lg font-semibold mb-2">AI-Powered Learning</h4>
+                <p className="text-muted-foreground">
+                  Harness the <span className="font-medium text-foreground">free resources of AI chatbots</span> for 
+                  distraction-free flashcard creation.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Closing Message */}
+          <div className="text-center mt-16 max-w-3xl mx-auto">
+            <p className="text-lg text-muted-foreground mb-4">
+              This app is designed to help you harness the free resources you have in your favorite AI chatbots to create 
+              <span className="font-semibold text-foreground"> distraction-free flashcards</span>.
+            </p>
+            <p className="text-xl">
+              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent font-bold">
+                Give us a try — CapireIQ is free while in Beta!
+              </span>
+            </p>
           </div>
         </div>
       </section>
