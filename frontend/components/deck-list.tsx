@@ -22,18 +22,19 @@ import {
 interface DeckListProps {
   decks: Deck[]
   onSelectDeck: (deck: Deck, missedOnly?: boolean) => void
-  onDeckDeleted: () => void;
+  onDeckDeleted: () => void
   onResetDeck: (deckId: string) => Promise<void>
+  userId: string
 }
 
-export function DeckList({ decks, onSelectDeck, onDeckDeleted, onResetDeck }: DeckListProps) {
+export function DeckList({ decks, onSelectDeck, onDeckDeleted, onResetDeck, userId }: DeckListProps) {
   const [resettingDeckId, setResettingDeckId] = useState<string | null>(null)
   const [deletingDeckId, setDeletingDeckId] = useState<string | null>(null)
 
-  const handleDelete = async (deckId: string) => {
+  const handleDelete = async (deckId: string, userId: string) => {
     try {
       setDeletingDeckId(deckId)
-      await deleteDeck(deckId)
+      await deleteDeck(deckId, userId)
       onDeckDeleted()
     } catch (error) {
       console.error("Failed to delete deck:", error)
@@ -173,7 +174,7 @@ export function DeckList({ decks, onSelectDeck, onDeckDeleted, onResetDeck }: De
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => handleDelete(deck.id)}
+                          onClick={() => handleDelete(deck.id, userId)}
                           className="bg-destructive text-white"
                         >
                           Delete

@@ -15,6 +15,7 @@ import { getStacks, getDecksForStack, resetDeck } from "@/lib/api";
 import { AppHeader } from "@/components/header"
 import { AppFooter } from "@/components/footer"
 import { useAuth } from "@/context/AuthContext"
+import { StackDescription } from "@/components/stack-description"
 
 
 
@@ -187,20 +188,34 @@ export default function Home() {
           />
         )}
 
-        {currentView === "decks" && selectedStack && (
-          <div className="space-y-8">
-            <div>
-              <Upload onUploadComplete={refreshDecks} selectedStackId={selectedStack.id} userId={user?.$id || ""} />
-            </div>
-
-            <DeckList 
-              decks={decks} 
-              onSelectDeck={handleSelectDeck} 
-              onDeckDeleted={refreshDecks} 
-              onResetDeck={(deckId) => resetDeck(deckId, user?.$id || "")}
-            />
-          </div>
-        )}
+{currentView === "decks" && selectedStack && (
+  <div className="space-y-8">
+    <div className="grid gap-4 md:grid-cols-3">
+      <StackDescription 
+        stack={selectedStack}
+        deckCount={decks.length} 
+        onUpdate={(updatedStack) => {
+          setSelectedStack(updatedStack);
+          // If you have a stacks state that needs updating, update it here as well
+        }}
+      />
+      <div className="col-span-2">
+        <Upload 
+          onUploadComplete={refreshDecks} 
+          selectedStackId={selectedStack.id} 
+          userId={user?.$id || ""} 
+        />
+      </div>
+    </div>
+    <DeckList 
+      decks={decks} 
+      onSelectDeck={handleSelectDeck} 
+      onDeckDeleted={refreshDecks} 
+      onResetDeck={(deckId) => resetDeck(deckId, user?.$id || "")}
+      userId={user?.$id || ""}
+    />
+  </div>
+)}
 
         {currentView === "study" && selectedDeck && (
           <StudyMode deck={selectedDeck} showMissedOnly={showMissedOnly} onBack={handleBackToDecks} />

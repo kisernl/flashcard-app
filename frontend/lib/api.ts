@@ -45,7 +45,8 @@ export async function getStacks(userId: string): Promise<Stack[]> {
   return res.documents.map(doc => ({
     id: doc.$id,
     name: doc.name || 'Unnamed Stack',
-    createdAt: new Date(doc.$createdAt).getTime()
+    createdAt: new Date(doc.$createdAt).getTime(),
+    ownerId: doc.ownerId || userId
   }));
 }
 
@@ -133,6 +134,7 @@ export async function createDeck(stackId: string, name: string, userId: string):
       stacks: stackId,
       title: name,
       ownerId: userId,
+      description: "",
     };
   
     return await databases.createDocument(
@@ -199,7 +201,7 @@ export async function createStack(name: string, userId: string): Promise<Models.
   }
   
 // Update a stack
-export async function updateStack(stackId: string, updates: { name?: string }): Promise<Models.Document> {
+export async function updateStack(stackId: string, updates: { name?: string; description?: string }): Promise<Models.Document> {
 return await databases.updateDocument(
     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
     "stacks",

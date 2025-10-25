@@ -16,5 +16,7 @@ export interface Deck {
 export interface Stack {
   id: string
   name: string
+  description?: string
   createdAt: number
+  ownerId: string
 }

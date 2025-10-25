@@ -22,6 +22,7 @@ interface UploadProps {
 export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProps) {
   const [deckName, setDeckName] = useState("")
   const [stackId, setStackId] = useState(selectedStackId || "general")
+  const [description, setDescription] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [pastedText, setPastedText] = useState("")
   const [error, setError] = useState("")
@@ -103,6 +104,7 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
   
       // Reset form
       setDeckName("")
+      setDescription("")
       setFile(null)
       setPastedText("")
       setError("")
@@ -136,6 +138,19 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
             value={deckName}
             onChange={(e) => setDeckName(e.target.value)}
             className="bg-background text-foreground"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="deck-description" className="text-foreground">
+            Description (optional)
+          </Label>
+          <Textarea
+            id="deck-description"
+            placeholder="Enter a description for your deck..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="bg-background text-foreground min-h-[80px]"
           />
         </div>
 
