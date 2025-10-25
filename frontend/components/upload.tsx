@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getStacks, createDeck, createCards } from "@/lib/api"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { getStacks, getDecksForStack, createDeck, createCards } from "@/lib/api"
 import type { Deck, Flashcard, Stack } from "@/lib/types"
 import { ManualEntryForm } from "./manual-entry-form"
 
@@ -28,7 +29,10 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
   const [pastedText, setPastedText] = useState("")
   const [error, setError] = useState("")
   const [stacks, setStacks] = useState<Stack[]>([])
-  const [activeTab, setActiveTab] = useState("upload")
+  const [activeTab, setActiveTab] = useState("paste")
+  const [mode, setMode] = useState<"new" | "existing">("new")
+  const [selectedDeckId, setSelectedDeckId] = useState("")
+  const [existingDecks, setExistingDecks] = useState<Deck[]>([])
 
 
   useEffect(() => {
@@ -37,7 +41,18 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
       setStacks(loadedStacks)
     }
     loadStacks()
-  }, [])
+  }, [userId])
+
+  useEffect(() => {
+    const loadExistingDecks = async () => {
+      if (stackId && mode === "existing") {
+        const decks = await getDecksForStack(stackId, userId)
+        setExistingDecks(decks)
+        setSelectedDeckId("")
+      }
+    }
+    loadExistingDecks()
+  }, [stackId, mode, userId])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -80,8 +95,13 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
   }
 
   const handleUpload = async () => {
-    if (!deckName.trim()) {
+    if (mode === "new" && !deckName.trim()) {
       setError("Please provide a deck name")
+      return
+    }
+
+    if (mode === "existing" && !selectedDeckId) {
+      setError("Please select an existing deck")
       return
     }
   
@@ -99,17 +119,35 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
         return
       }
   
-      // 1. Create the deck in the database
-      const newDeck = await createDeck(stackId, deckName.trim(), userId)
+      let deckId: string
       
-      // 2. Add all cards to the deck
-      await createCards(newDeck.$id, cards, userId)
+      if (mode === "new") {
+        // Create new deck
+        const newDeck = await createDeck(stackId, deckName.trim(), userId)
+        deckId = newDeck.$id
+      } else {
+        // Use existing deck
+        deckId = selectedDeckId
+        
+        // Get existing cards to determine next order number
+        const existingDeck = existingDecks.find(d => d.id === selectedDeckId)
+        if (existingDeck && existingDeck.cards.length > 0) {
+          const maxOrder = Math.max(...existingDeck.cards.map((_, index) => index))
+          cards.forEach((card, index) => {
+            card.id = `${Date.now()}-${maxOrder + 1 + index}`
+          })
+        }
+      }
+      
+      // Add all cards to the deck
+      await createCards(deckId, cards, userId)
   
       // Reset form
       setDeckName("")
       setDescription("")
       setFile(null)
       setPastedText("")
+      setSelectedDeckId("")
       setError("")
       onUploadComplete()
   
@@ -125,37 +163,77 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
   return (
     <Card className="border-border bg-card">
       <CardHeader>
-        <CardTitle className="text-foreground">Create New Deck</CardTitle>
+        <CardTitle className="text-foreground">Add Flashcards</CardTitle>
         <CardDescription className="text-muted-foreground">
           Upload a CSV file or paste CSV data with two columns: front (question) and back (answer)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="deck-name" className="text-foreground">
-            Deck Name
+        <div className="space-y-3">
+          <Label className="text-foreground text-sm font-medium">
+            Choose Option
           </Label>
-          <Input
-            id="deck-name"
-            placeholder="e.g., Spanish Vocabulary"
-            value={deckName}
-            onChange={(e) => setDeckName(e.target.value)}
-            className="bg-background text-foreground"
-          />
+          <RadioGroup value={mode} onValueChange={(value: "new" | "existing") => setMode(value)}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="new" id="new" />
+              <Label htmlFor="new" className="text-foreground">Create New Deck</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="existing" id="existing" />
+              <Label htmlFor="existing" className="text-foreground">Add to Existing Deck</Label>
+            </div>
+          </RadioGroup>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="deck-description" className="text-foreground">
-            Description (optional)
-          </Label>
-          <Textarea
-            id="deck-description"
-            placeholder="Enter a description for your deck..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="bg-background text-foreground min-h-[80px]"
-          />
-        </div>
+        {mode === "new" && (
+          <div className="space-y-2">
+            <Label htmlFor="deck-name" className="text-foreground">
+              Deck Name
+            </Label>
+            <Input
+              id="deck-name"
+              placeholder="e.g., Spanish Vocabulary"
+              value={deckName}
+              onChange={(e) => setDeckName(e.target.value)}
+              className="bg-background text-foreground"
+            />
+          </div>
+        )}
+
+        {mode === "existing" && (
+          <div className="space-y-2">
+            <Label htmlFor="existing-deck" className="text-foreground">
+              Select Existing Deck
+            </Label>
+            <Select value={selectedDeckId} onValueChange={setSelectedDeckId}>
+              <SelectTrigger id="existing-deck" className="bg-background text-foreground">
+                <SelectValue placeholder="Select a deck to add cards to" />
+              </SelectTrigger>
+              <SelectContent>
+                {existingDecks.map((deck) => (
+                  <SelectItem key={deck.id} value={deck.id}>
+                    {deck.title} ({deck.cards.length} cards)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {mode === "new" && (
+          <div className="space-y-2">
+            <Label htmlFor="deck-description" className="text-foreground">
+              Description (optional)
+            </Label>
+            <Textarea
+              id="deck-description"
+              placeholder="Enter a description for your deck..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="bg-background text-foreground min-h-[80px]"
+            />
+          </div>
+        )}
 
         {/* <div className="space-y-2">
           <Label htmlFor="stack-select" className="text-foreground">
@@ -177,8 +255,8 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="upload">Upload File</TabsTrigger>
             <TabsTrigger value="paste">Paste CSV</TabsTrigger>
+            <TabsTrigger value="upload">Upload File</TabsTrigger>
             <TabsTrigger value="manual">Manual Entry</TabsTrigger>
           </TabsList>
 
@@ -224,18 +302,33 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
           {/* Manual Entry */}
           <TabsContent value="manual" className="space-y-4">
             <ManualEntryForm
+              mode={mode}
               onChangeError={setError}
               onSubmit={async (cards) => {
-                if (!deckName.trim()) {
+                if (mode === "new" && !deckName.trim()) {
                   setError("Please provide a deck name")
                   return
                 }
 
-                const newDeck = await createDeck(stackId, deckName.trim(), userId)
-                await createCards(newDeck.$id, cards, userId)
+                if (mode === "existing" && !selectedDeckId) {
+                  setError("Please select an existing deck")
+                  return
+                }
+
+                let deckId: string
+                
+                if (mode === "new") {
+                  const newDeck = await createDeck(stackId, deckName.trim(), userId)
+                  deckId = newDeck.$id
+                } else {
+                  deckId = selectedDeckId
+                }
+
+                await createCards(deckId, cards, userId)
 
                 setDeckName("")
                 setDescription("")
+                setSelectedDeckId("")
                 setError("")
                 onUploadComplete()
               }}
@@ -249,7 +342,11 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
         {activeTab !== "manual" && (
           <Button
             onClick={handleUpload}
-            disabled={!deckName.trim() || (!file && !pastedText.trim())}
+            disabled={
+              (mode === "new" && !deckName.trim()) ||
+              (mode === "existing" && !selectedDeckId) ||
+              (!file && !pastedText.trim())
+            }
             className="w-full"
           >
             {file || pastedText ? (
@@ -257,7 +354,7 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
             ) : (
               <ClipboardPaste className="mr-2 h-4 w-4" />
             )}
-            Create Deck
+            {mode === "new" ? "Create Deck" : "Add Cards"}
           </Button>
         )}
 

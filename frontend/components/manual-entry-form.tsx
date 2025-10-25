@@ -8,9 +8,10 @@ import type { Flashcard } from "@/lib/types"
 interface ManualEntryFormProps {
   onSubmit: (cards: Flashcard[]) => Promise<void>
   onChangeError?: (msg: string) => void
+  mode?: "new" | "existing"
 }
 
-export function ManualEntryForm({ onSubmit, onChangeError }: ManualEntryFormProps) {
+export function ManualEntryForm({ onSubmit, onChangeError, mode = "new" }: ManualEntryFormProps) {
   const [cards, setCards] = useState([{ front: "", back: "" }])
   const [loading, setLoading] = useState(false)
 
@@ -57,7 +58,7 @@ export function ManualEntryForm({ onSubmit, onChangeError }: ManualEntryFormProp
               placeholder="Question..."
               value={card.front}
               onChange={(e) => updateCard(index, "front", e.target.value)}
-              className="bg-background text-foreground"
+              className="bg-background text-foreground mt-2"
             />
           </div>
           <div className="flex items-end gap-2">
@@ -67,7 +68,7 @@ export function ManualEntryForm({ onSubmit, onChangeError }: ManualEntryFormProp
                 placeholder="Answer..."
                 value={card.back}
                 onChange={(e) => updateCard(index, "back", e.target.value)}
-                className="bg-background text-foreground"
+                className="bg-background text-foreground mt-2"
               />
             </div>
             {cards.length > 1 && (
@@ -83,17 +84,18 @@ export function ManualEntryForm({ onSubmit, onChangeError }: ManualEntryFormProp
           </div>
         </div>
       ))}
-
-      <Button variant="outline" onClick={addCard} className="w-full">
-        <PlusCircle className="mr-2 h-4 w-4" /> Add Another Card
-      </Button>
+      <div className="flex justify-center">
+        <Button onClick={addCard} className="w-fit bg-transparent text-primary hover:bg-transparent hover:scale-105 transition-all">
+          <PlusCircle className="mr-2 h-4 w-4" /> Add Another Card
+        </Button>
+      </div>
 
       <Button
         onClick={handleSubmit}
         disabled={loading || validCards.length === 0}
         className="w-full"
       >
-        {loading ? "Saving..." : "Create Deck with Cards"}
+        {loading ? "Saving..." : mode === "existing" ? "Add Cards" : "Create Deck with Cards"}
       </Button>
     </div>
   )

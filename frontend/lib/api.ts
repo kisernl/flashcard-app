@@ -45,6 +45,7 @@ export async function getStacks(userId: string): Promise<Stack[]> {
   return res.documents.map(doc => ({
     id: doc.$id,
     name: doc.name || 'Unnamed Stack',
+    description: doc.description,
     createdAt: new Date(doc.$createdAt).getTime(),
     ownerId: doc.ownerId || userId
   }));
