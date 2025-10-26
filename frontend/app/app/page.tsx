@@ -198,7 +198,7 @@ export default function Home() {
                   setSelectedStack(updatedStack);
                 }}
               />
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <Upload 
                   onUploadComplete={refreshDecks} 
                   selectedStackId={selectedStack.id} 

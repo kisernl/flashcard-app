@@ -26,7 +26,7 @@ export function AppHeader() {
               className="h-12 w-auto"
               priority
             />
-            <span className="text-xl font-semibold tracking-tight hover:opacity-80">
+            <span className="hidden md:block text-xl font-semibold tracking-tight hover:opacity-80">
               CAPIRE <span className="text-[#f4bb19]">IQ</span>
             </span>
           </Link>
@@ -41,8 +41,8 @@ export function AppHeader() {
             <div className="h-8 w-20 bg-muted animate-pulse rounded-md" />
           ) : user ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-muted-foreground">
-                Hi, {user.name || user.email}
+              <span className="hidden md:block text-sm font-medium text-muted-foreground">
+                Hi, {user.email}
               </span>
               {pathname !== '/app' && (
                 <Link href="/app" passHref>
