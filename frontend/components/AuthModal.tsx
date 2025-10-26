@@ -7,10 +7,24 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
-export function AuthModal() {
+import { ArrowRight } from "lucide-react";
+
+interface AuthModalProps {
+  triggerText?: string;
+  defaultMode?: "login" | "signup";
+  size?: "sm" | "default" | "lg";
+  showArrow?: boolean;
+}
+
+export function AuthModal({ 
+  triggerText = "Login", 
+  defaultMode = "login", 
+  size = "default",
+  showArrow = false 
+}: AuthModalProps) {
   const { login, signup } = useAuth();
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup">(defaultMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -39,7 +53,9 @@ export function AuthModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">Login</Button>
+        <Button variant="default" size={size} className={triggerText === "Get Started" ? "font-semibold" : ""}>
+          {triggerText} {showArrow && <ArrowRight className="ml-2 h-4 w-4" />}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

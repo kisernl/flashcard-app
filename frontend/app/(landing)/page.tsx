@@ -5,7 +5,70 @@ import Link from "next/link"
 import { AppHeader} from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { AppFooter } from "@/components/footer"
+import { AuthModal } from "@/components/AuthModal"
+import { useAuth } from "@/context/AuthContext"
 import { ArrowRight } from "lucide-react"
+
+function GetStartedButton() {
+  const { user, isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <Button size="lg" disabled className="font-semibold">
+        Loading...
+      </Button>
+    );
+  }
+  
+  if (isAuthenticated) {
+    return (
+      <Link href="/app">
+        <Button size="lg" className="font-semibold">
+          Go to App <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </Link>
+    );
+  }
+  
+  return (
+    <AuthModal 
+      triggerText="Get Started"
+      defaultMode="signup"
+      size="lg"
+      showArrow={true}
+    />
+  );
+}
+
+function SignUpButton() {
+  const { user, isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <Button size="lg" disabled>
+        Loading...
+      </Button>
+    );
+  }
+  
+  if (isAuthenticated) {
+    return (
+      <Link href="/app">
+        <Button size="lg">
+          Go to Dashboard
+        </Button>
+      </Link>
+    );
+  }
+  
+  return (
+    <AuthModal 
+      triggerText="Sign Up Free"
+      defaultMode="signup"
+      size="lg"
+    />
+  );
+}
 
 export default function LandingPage() {
   return (
@@ -27,11 +90,7 @@ export default function LandingPage() {
                   progress organized with decks and stacks.
                 </p>
                 <div className="text-left">
-                  <Link href="/app">
-                    <Button size="lg" className="font-semibold">
-                      Get Started <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <GetStartedButton />
                 </div>
               </div>
 
@@ -212,9 +271,7 @@ export default function LandingPage() {
         <p className="text-muted-foreground mb-8">
           It only takes a few seconds to start building your own flashcard decks.
         </p>
-        <Link href="/app">
-          <Button size="lg">Sign Up Free</Button>
-        </Link>
+        <SignUpButton />
       </section>
 
       <AppFooter />
