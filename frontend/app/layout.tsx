@@ -7,7 +7,7 @@ import './globals.css'
 import { AuthProvider } from '@/context/AuthContext'
 
 export const metadata: Metadata = {
-  title: 'Flashcard Study App',
+  title: 'CapireIQ',
   description: 'A minimalist flashcard app.',
   generator: 'Next.js',
 }
