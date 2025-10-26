@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -24,7 +24,7 @@ export function StackList({ onSelectStack, userId }: StackListProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true)
     try {
       const loadedStacks = await getStacks(userId)
@@ -42,11 +42,11 @@ export function StackList({ onSelectStack, userId }: StackListProps) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [userId])
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [loadData])
 
   const handleCreateStack = async () => {
     if (!newStackName.trim()) return

@@ -63,7 +63,7 @@ export default function Home() {
       }
     };
     loadInitialData();
-  }, []);
+  }, [user?.$id]);
 
   // const refreshDecks = async () => {
   //   if (selectedStack) {

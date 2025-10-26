@@ -98,7 +98,7 @@ export function StudyMode({ deck, showMissedOnly, onBack }: StudyModeProps) {
             <div className="text-center">
               <h2 className="text-2xl font-semibold text-foreground">Session Complete!</h2>
               <p className="mt-2 text-muted-foreground">
-                You've reviewed {studyCards.length} {studyCards.length === 1 ? "card" : "cards"}
+                You&apos;ve reviewed {studyCards.length} {studyCards.length === 1 ? "card" : "cards"}
               </p>
               {missedCount > 0 && (
                 <p className="mt-1 text-destructive">
