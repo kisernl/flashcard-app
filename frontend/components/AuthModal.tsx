@@ -38,7 +38,7 @@ export function AuthModal({
       if (mode === "login") {
         await login(email, password);
       } else {
-        await signup(email, password); // make sure signup accepts name if needed
+        await signup(email, password, name);
       }
       setOpen(false); 
       router.push("/app"); // redirect to dashboard after success

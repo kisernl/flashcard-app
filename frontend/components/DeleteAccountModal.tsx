@@ -15,14 +15,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
 import { Functions } from "appwrite";
 import { client } from "@/lib/appwrite";
 
 export function DeleteAccountModal() {
   const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
-  const router = useRouter();
 
   const handleDeleteAccount = async () => {
     if (!user) return;
@@ -44,8 +42,8 @@ export function DeleteAccountModal() {
           localStorage.removeItem("decks");
           localStorage.removeItem("stacks");
           
-          // Redirect to landing page
-          router.push("/");
+          // Force complete page reload to landing page
+          window.location.href = "/";
         } else {
           throw new Error(response.error || 'Failed to delete account');
         }
