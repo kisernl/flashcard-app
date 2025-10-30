@@ -154,7 +154,7 @@ export function StudyMode({ deck, showMissedOnly, onBack }: StudyModeProps) {
                 {isFlipped ? currentCard.back : currentCard.front}
               </p>
               {!isFlipped && <p className="mt-6 text-sm text-muted-foreground">Click to reveal answer</p>}
-              {isFlipped && <p className="mt-6 text-sm text-muted-foreground">Click to reveal answer</p>}
+              {isFlipped && <p className="mt-6 text-sm text-muted-foreground">Click to flip back</p>}
             </div>
           </CardContent>
         </Card>
