@@ -33,7 +33,7 @@ export function DeleteAccountModal() {
       // Call the Appwrite function to delete all user data
       const functions = new Functions(client);
       const result = await functions.createExecution(
-        'deleteUserData', // Function ID (will need to be set after function deployment)
+        '690376ff001ae0c77a9f',
         JSON.stringify({ userId: user.$id })
       );
 
