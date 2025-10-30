@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { useAuth } from "@/context/AuthContext";
 import { AuthModal } from "./AuthModal";
+import { DeleteAccountModal } from "./DeleteAccountModal";
 import { usePathname } from "next/navigation";
 
 export function AppHeader() {
@@ -40,10 +41,13 @@ export function AppHeader() {
           {loading ? (
             <div className="h-8 w-20 bg-muted animate-pulse rounded-md" />
           ) : user ? (
-            <div className="flex items-center gap-3">
-              <span className="hidden md:block text-sm font-medium text-muted-foreground">
-                Hi, {user.email}
-              </span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <span className="hidden md:block text-sm font-medium text-muted-foreground">
+                  Hi, {user.email}
+                </span>
+                <DeleteAccountModal />
+              </div>
               {pathname !== '/app' && (
                 <Link href="/app" passHref>
                   <Button className="font-medium bg-primary text-primary-foreground hover:bg-primary/90">
