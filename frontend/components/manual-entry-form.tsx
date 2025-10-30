@@ -9,9 +9,11 @@ interface ManualEntryFormProps {
   onSubmit: (cards: Flashcard[]) => Promise<void>
   onChangeError?: (msg: string) => void
   mode?: "new" | "existing"
+  deckName?: string
+  onDeckNameChange?: (name: string) => void
 }
 
-export function ManualEntryForm({ onSubmit, onChangeError, mode = "new" }: ManualEntryFormProps) {
+export function ManualEntryForm({ onSubmit, onChangeError, mode = "new", deckName = "", onDeckNameChange }: ManualEntryFormProps) {
   const [cards, setCards] = useState([{ front: "", back: "" }])
   const [loading, setLoading] = useState(false)
 
@@ -92,7 +94,7 @@ export function ManualEntryForm({ onSubmit, onChangeError, mode = "new" }: Manua
 
       <Button
         onClick={handleSubmit}
-        disabled={loading || validCards.length === 0}
+        disabled={loading || validCards.length === 0 || deckName.trim() === ""}
         className="w-full"
       >
         {loading ? "Saving..." : mode === "existing" ? "Add Cards" : "Create Deck with Cards"}

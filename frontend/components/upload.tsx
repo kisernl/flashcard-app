@@ -332,6 +332,8 @@ export function Upload({ onUploadComplete, selectedStackId, userId }: UploadProp
                 setError("")
                 onUploadComplete()
               }}
+              deckName={deckName}
+              onDeckNameChange={setDeckName}
             />
           </TabsContent>
         </Tabs>

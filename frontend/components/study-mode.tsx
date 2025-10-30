@@ -142,10 +142,10 @@ export function StudyMode({ deck, showMissedOnly, onBack }: StudyModeProps) {
 
       <div className="mx-auto max-w-2xl">
         <Card
-          className="min-h-[400px] cursor-pointer border-border bg-card transition-all hover:shadow-lg"
+          className="min-h-[300px] cursor-pointer border-border bg-card transition-all hover:shadow-lg"
           onClick={handleFlip}
         >
-          <CardContent className="flex h-full min-h-[400px] items-center justify-center p-8">
+          <CardContent className="flex h-full min-h-[300px] items-center justify-center p-8">
             <div className="text-center">
               <p className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground">
                 {isFlipped ? "Answer" : "Question"}
@@ -154,9 +154,13 @@ export function StudyMode({ deck, showMissedOnly, onBack }: StudyModeProps) {
                 {isFlipped ? currentCard.back : currentCard.front}
               </p>
               {!isFlipped && <p className="mt-6 text-sm text-muted-foreground">Click to reveal answer</p>}
+              {isFlipped && <p className="mt-6 text-sm text-muted-foreground">Click to reveal answer</p>}
             </div>
           </CardContent>
         </Card>
+        {!isFlipped && (
+          <div className="p-8"></div>
+        )}
 
         {isFlipped && (
           <div className="mt-6 flex gap-4">
